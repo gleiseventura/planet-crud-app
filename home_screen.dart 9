@@ -1,0 +1,55 @@
+import 'package:flutter/material.dart';
+import '../controllers/planet_controller.dart';
+import '../models/planeta.dart';
+import 'add_edit_planet_screen.dart';
+import 'planet_detail_screen.dart';
+
+class HomeScreen extends StatelessWidget {
+  final PlanetController controller = PlanetController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Planetas')),
+      body: FutureBuilder<List<Planeta>>(
+        future: controller.getPlanetas(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text('Erro: ${snapshot.error}');
+          } else if (snapshot.hasData) {
+            final planetas = snapshot.data!;
+            return ListView.builder(
+              itemCount: planetas.length,
+              itemBuilder: (context, index) {
+                final planeta = planetas[index];
+                return ListTile(
+                  title: Text(planeta.nome),
+                  subtitle: Text(planeta.apelido ?? ''),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PlanetDetailScreen(planeta: planeta),
+                    ),
+                  ),
+                );
+              },
+            );
+          } else {
+            return Text('Sem dados');
+          }
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AddEditPlanetScreen(),
+          ),
+        ),
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
